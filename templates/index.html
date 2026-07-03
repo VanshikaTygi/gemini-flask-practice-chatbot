@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Classroom Assistant</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 90vh; }
+        .chat-container { width: 100%; max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { background: #4A00E0; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; }
+        #chatbox { height: 350px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+        .msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; word-wrap: break-word; line-height: 1.4; font-size: 0.95rem; }
+        .user-msg { background: #E2E8F0; color: #1A202C; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .bot-msg { background: #EBF8FF; color: #2B6CB0; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #E2E8F0; }
+        #user-input { flex: 1; padding: 12px; border: 1px solid #CBD5E0; border-radius: 6px; outline: none; font-size: 0.95rem; }
+        button { background: #4A00E0; color: white; border: none; padding: 0 20px; margin-left: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background: #3A00B0; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">💡 Smart AI Classroom Assistant</div>
+        <div id="chatbox"></div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Ask me any academic question..." onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatbox = document.getElementById('chatbox');
+            const text = input.value.trim();
+            if (!text) return;
+
+            chatbox.innerHTML += `<div class="msg user-msg"><b>You:</b> ${text}</div>`;
+            input.value = '';
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+                chatbox.innerHTML += `<div class="msg bot-msg"><b>Bot:</b> ${data.reply}</div>`;
+            } catch (err) {
+                chatbox.innerHTML += `<div class="msg bot-msg" style="color:red;"><b>Bot:</b> Connection lost. Try again.</div>`;
+            }
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
