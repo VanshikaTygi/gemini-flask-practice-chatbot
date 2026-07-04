@@ -3,54 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Classroom Assistant</title>
+    <title>Advanced AI Academic Hub</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 90vh; }
-        .chat-container { width: 100%; max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-        .chat-header { background: #4A00E0; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        #chatbox { height: 350px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
-        .msg { padding: 10px 14px; border-radius: 8px; max-width: 80%; word-wrap: break-word; line-height: 1.4; font-size: 0.95rem; }
-        .user-msg { background: #E2E8F0; color: #1A202C; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .bot-msg { background: #EBF8FF; color: #2B6CB0; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #E2E8F0; }
-        #user-input { flex: 1; padding: 12px; border: 1px solid #CBD5E0; border-radius: 6px; outline: none; font-size: 0.95rem; }
-        button { background: #4A00E0; color: white; border: none; padding: 0 20px; margin-left: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-        button:hover { background: #3A00B0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 95vh; }
+        .app-window { width: 100%; max-width: 600px; background: #1e293b; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; }
+        .header { background: #6366f1; padding: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .mode-select { background: #334155; color: white; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px; cursor: pointer; outline: none; }
+        #chat-viewport { height: 380px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: #0f172a; }
+        .bubble { padding: 12px 16px; border-radius: 8px; max-width: 85%; word-wrap: break-word; font-size: 0.95rem; white-space: pre-line; }
+        .user-bubble { background: #38bdf8; color: #0f172a; align-self: flex-end; font-weight: 500; }
+        .bot-bubble { background: #1e293b; color: #f1f5f9; align-self: flex-start; border: 1px solid #334155; }
+        .input-bar { display: flex; padding: 15px; background: #1e293b; border-top: 1px solid #334155; }
+        #message-input { flex: 1; padding: 12px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: white; outline: none; }
+        .action-btn { background: #6366f1; color: white; border: none; padding: 0 22px; margin-left: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .action-btn:hover { background: #4f46e5; }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">💡 Smart AI Classroom Assistant</div>
-        <div id="chatbox"></div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask me any academic question..." onkeypress="if(event.key === 'Enter') sendMessage()">
-            <button onclick="sendMessage()">Send</button>
+    <div class="app-window">
+        <div class="header">
+            <span>⚙️ CodeExplainer & Tutor Suite</span>
+            <select id="app-mode" class="mode-select">
+                <option value="general">📚 General Chat</option>
+                <option value="explain">💻 Code Explainer</option>
+            </select>
+        </div>
+        <div id="chat-viewport">
+            <div class="bubble bot-bubble"><b>System:</b> Hub active. Switch workspace modes above to analyze application builds or ask concepts.</div>
+        </div>
+        <div class="input-bar">
+            <input type="text" id="message-input" placeholder="Type a concept query or paste a snippet..." onkeypress="if(event.key==='Enter') dispatchMessage()">
+            <button class="action-btn" onclick="dispatchMessage()">Submit</button>
         </div>
     </div>
 
     <script>
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const chatbox = document.getElementById('chatbox');
-            const text = input.value.trim();
-            if (!text) return;
+        async function dispatchMessage() {
+            const field = document.getElementById('message-input');
+            const view = document.getElementById('chat-viewport');
+            const mode = document.getElementById('app-mode').value;
+            const query = field.value.trim();
+            if (!query) return;
 
-            chatbox.innerHTML += `<div class="msg user-msg"><b>You:</b> ${text}</div>`;
-            input.value = '';
-            chatbox.scrollTop = chatbox.scrollHeight;
+            view.innerHTML += `<div class="bubble user-bubble"><b>You:</b> ${query}</div>`;
+            field.value = '';
+            view.scrollTop = view.scrollHeight;
 
             try {
-                const res = await fetch('/chat', {
+                const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({ message: query, mode: mode })
                 });
-                const data = await res.json();
-                chatbox.innerHTML += `<div class="msg bot-msg"><b>Bot:</b> ${data.reply}</div>`;
-            } catch (err) {
-                chatbox.innerHTML += `<div class="msg bot-msg" style="color:red;"><b>Bot:</b> Connection lost. Try again.</div>`;
+                const payload = await response.json();
+                view.innerHTML += `<div class="bubble bot-bubble"><b>AI:</b> ${payload.reply}</div>`;
+            } catch (error) {
+                view.innerHTML += `<div class="bubble bot-bubble" style="color:#ef4444;"><b>System:</b> Network frame dispatch failed.</div>`;
             }
-            chatbox.scrollTop = chatbox.scrollHeight;
+            view.scrollTop = view.scrollHeight;
         }
     </script>
 </body>
